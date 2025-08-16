@@ -1,0 +1,63 @@
+{% extends "base.html" %} {% block title %}Employees - {{ super() }}{% endblock
+%} {% block content %}
+<div class="header">
+  <h1>Employee Management System</h1>
+  <a href="/add" class="btn btn-primary">Add New Employee</a>
+</div>
+
+<div class="table-container">
+  <table class="employee-table">
+    <thead>
+      <tr>
+        <th>Image</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Salary</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for employee in employees %}
+      <tr>
+        <td class="image-cell">
+          {% if employee.image_url %}
+          <img
+            src="{{ employee.image_url }}"
+            alt="{{ employee.first_name }}"
+            class="employee-image"
+          />
+          {% else %}
+          <div class="no-image">No Image</div>
+          {% endif %}
+        </td>
+        <td>{{ employee.first_name }} {{ employee.last_name }}</td>
+        <td>{{ employee.email }}</td>
+        <td>${{ "%.2f"|format(employee.salary) }}</td>
+        <td class="actions">
+          <a href="/edit/{{ employee.id }}" class="btn btn-edit">Edit</a>
+          <form
+            method="post"
+            action="/deactivate/{{ employee.id }}"
+            style="display: inline"
+          >
+            <button
+              type="submit"
+              class="btn btn-deactivate"
+              onclick="return confirm('Are you sure you want to deactivate this employee?')"
+            >
+              Deactivate
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if not employees %}
+  <div class="empty-state">
+    <p>No employees found. <a href="/add">Add the first employee</a></p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
