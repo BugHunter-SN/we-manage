@@ -1,4 +1,4 @@
-# supabase-auth
+<!-- # supabase-auth
 
 ```
 employee_repo/
@@ -15,4 +15,4 @@ employee_repo/
 ├── models.py
 ├── forms.py
 └── main.py
-```
+``` -->
