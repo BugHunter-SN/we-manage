@@ -7,8 +7,11 @@ load_dotenv()
 
 # Supabase configuration
 SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_KEY")  # ✅ Changed to match your .env
-SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "demo-bucket")  # Default bucket name
+SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_KEY") 
+SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "demo-bucket")
 
-# Create Supabase client
+if not all([SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_BUCKET]):
+    raise EnvironmentError("One or more Supabase environment variables are missing.") 
+
+# Initialize Supabase client
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
