@@ -16,3 +16,7 @@ employee_repo/
 ├── forms.py
 └── main.py
 ```
+## To start the app run
+```python
+ uvicorn main:app --reload
+```
