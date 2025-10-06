@@ -2,7 +2,14 @@
 endblock %} {% block content %}
 <div class="header">
   <h1>Edit Employee</h1>
-  <a href="/" class="btn btn-secondary">Back to List</a>
+  <div class="header-actions">
+    <a href="/details/{{ employee.id }}" class="btn btn-info">
+      <i class="fas fa-eye"></i> View Details
+    </a>
+    <a href="/" class="btn btn-secondary">
+      <i class="fas fa-arrow-left"></i> Back to List
+    </a>
+  </div>
 </div>
 
 <div class="form-container">
@@ -12,71 +19,284 @@ endblock %} {% block content %}
     enctype="multipart/form-data"
     class="employee-form"
   >
-    <div class="form-group">
-      <label for="first_name">First Name:</label>
-      <input
-        type="text"
-        id="first_name"
-        name="first_name"
-        value="{{ employee.first_name }}"
-        required
-      />
+    <div class="form-row">
+      <div class="form-group">
+        <label for="first_name">
+          <i class="fas fa-user"></i> First Name:
+        </label>
+        <input
+          type="text"
+          id="first_name"
+          name="first_name"
+          value="{{ employee.first_name }}"
+          placeholder="Enter first name"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="last_name"> <i class="fas fa-user"></i> Last Name: </label>
+        <input
+          type="text"
+          id="last_name"
+          name="last_name"
+          value="{{ employee.last_name }}"
+          placeholder="Enter last name"
+          required
+        />
+      </div>
     </div>
 
     <div class="form-group">
-      <label for="last_name">Last Name:</label>
-      <input
-        type="text"
-        id="last_name"
-        name="last_name"
-        value="{{ employee.last_name }}"
-        required
-      />
-    </div>
-
-    <div class="form-group">
-      <label for="email">Email:</label>
+      <label for="email"> <i class="fas fa-envelope"></i> Email: </label>
       <input
         type="email"
         id="email"
         name="email"
         value="{{ employee.email }}"
+        placeholder="Enter email address"
         required
       />
     </div>
 
     <div class="form-group">
-      <label for="salary">Salary:</label>
+      <label for="salary">
+        <i class="fas fa-dollar-sign"></i> Salary (USD):
+      </label>
       <input
         type="number"
         id="salary"
         name="salary"
-        value="{{ employee.salary }}"
+        value="{{ employee.salary if employee.salary else '' }}"
         step="0.01"
         min="0"
-        required
+        placeholder="Enter salary amount"
       />
+      <small class="form-help">Leave empty if salary is not specified</small>
     </div>
 
     <div class="form-group">
-      <label for="image">Profile Image:</label>
-      <input type="file" id="image" name="image" accept="image/*" />
+      <label for="image"> <i class="fas fa-camera"></i> Profile Image: </label>
+      <input
+        type="file"
+        id="image"
+        name="image"
+        accept="image/*"
+        onchange="previewImage(this)"
+      />
+      <small class="form-help"
+        >Upload a new image to replace the current one</small
+      >
+
       {% if employee.image_url %}
       <div class="current-image">
-        <p>Current image:</p>
-        <img
-          src="{{ employee.image_url }}"
-          alt="{{ employee.first_name }}"
-          class="preview-image"
-        />
+        <p class="image-label">Current image:</p>
+        <div class="image-preview-container">
+          <img
+            id="currentImage"
+            src="{{ employee.image_url }}"
+            alt="{{ employee.first_name }} {{ employee.last_name }}"
+            class="preview-image"
+          />
+        </div>
       </div>
       {% endif %}
+
+      <!-- Preview for new image -->
+      <div id="newImagePreview" class="current-image" style="display: none">
+        <p class="image-label">New image preview:</p>
+        <div class="image-preview-container">
+          <img
+            id="newImage"
+            src=""
+            alt="New image preview"
+            class="preview-image"
+          />
+        </div>
+      </div>
     </div>
 
     <div class="form-actions">
-      <button type="submit" class="btn btn-primary">Update Employee</button>
-      <a href="/" class="btn btn-secondary">Cancel</a>
+      <button type="submit" class="btn btn-success">
+        <i class="fas fa-save"></i> Update Employee
+      </button>
+      <a href="/" class="btn btn-secondary">
+        <i class="fas fa-times"></i> Cancel
+      </a>
     </div>
   </form>
 </div>
+
+<script>
+  function previewImage(input) {
+    const newImagePreview = document.getElementById("newImagePreview");
+    const newImage = document.getElementById("newImage");
+
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        newImage.src = e.target.result;
+        newImagePreview.style.display = "block";
+      };
+
+      reader.readAsDataURL(input.files[0]);
+    } else {
+      newImagePreview.style.display = "none";
+    }
+  }
+</script>
+
+<style>
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 20px;
+  }
+
+  .form-row .form-group {
+    flex: 1;
+  }
+
+  .form-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+  }
+
+  .form-group input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  }
+
+  .form-help {
+    display: block;
+    margin-top: 5px;
+    color: #666;
+    font-size: 14px;
+  }
+
+  .current-image {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+  }
+
+  .image-label {
+    margin: 0 0 10px 0;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .image-preview-container {
+    text-align: center;
+  }
+
+  .preview-image {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    object-fit: cover;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .btn-success {
+    background-color: #28a745;
+    color: white;
+  }
+
+  .btn-success:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+  }
+
+  .btn-info {
+    background-color: #17a2b8;
+    color: white;
+  }
+
+  .btn-info:hover {
+    background-color: #138496;
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 768px) {
+    .form-row {
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .header {
+      flex-direction: column;
+      gap: 15px;
+      text-align: center;
+    }
+
+    .header-actions {
+      justify-content: center;
+    }
+
+    .form-actions {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+</style>
 {% endblock %}

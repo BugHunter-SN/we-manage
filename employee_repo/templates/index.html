@@ -1,8 +1,19 @@
-{% extends "base.html" %} {% block title %}Employees - {{ super() }}{% endblock
-%} {% block content %}
+{% extends "base.html" %}  
+
+{% block title %}Employees - {{ super() }}{% endblock %}
+
+{% block content %}
 <div class="header">
-  <h1>Employee Management System</h1>
-  <a href="/add" class="btn btn-primary">Add New Employee</a>
+  <h1>We Manage</h1>
+  <div class="header-info">
+    <span class="employee-count">
+      <i class="fas fa-users"></i> 
+      {{ pagination.total_employees }} Total Employees
+    </span>
+    <a href="/add" class="btn btn-primary">
+      <i class="fas fa-plus"></i> Add New Employee
+    </a>
+  </div>
 </div>
 
 <div class="table-container">
@@ -12,7 +23,7 @@
         <th>Image</th>
         <th>Name</th>
         <th>Email</th>
-        <th>Salary</th>
+        <th>Salary (USD)</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -32,9 +43,23 @@
         </td>
         <td>{{ employee.first_name }} {{ employee.last_name }}</td>
         <td>{{ employee.email }}</td>
-        <td>${{ "%.2f"|format(employee.salary) }}</td>
+        <td>
+          {% if employee.salary %}
+            ${{ "%.2f"|format(employee.salary) }}
+          {% else %}
+            <span class="text-muted">N/A</span>
+          {% endif %}
+        </td>
         <td class="actions">
-          <a href="/edit/{{ employee.id }}" class="btn btn-edit">Edit</a>
+          <a
+            href="/details/{{ employee.id }}"
+            class="btn btn-info btn-sm"
+            style="padding: 6px 12px; margin-right: 5px;"
+          >
+            <i class="fas fa-eye"></i> View
+          </a>
+          
+          {% if employee.is_active %}
           <form
             method="post"
             action="/deactivate/{{ employee.id }}"
@@ -45,9 +70,12 @@
               class="btn btn-deactivate"
               onclick="return confirm('Are you sure you want to deactivate this employee?')"
             >
-              Deactivate
+              <i class="fas fa-times"></i> Deactivate
             </button>
           </form>
+          {% else %}
+          <span class="badge bg-secondary">Inactive</span>
+          {% endif %}
         </td>
       </tr>
       {% endfor %}
@@ -60,4 +88,223 @@
   </div>
   {% endif %}
 </div>
+
+<!-- Pagination Controls -->
+{% if pagination.total_pages > 1 %}
+<div class="pagination-container">
+  <div class="pagination-info">
+    <span class="pagination-text">
+      Showing {{ ((pagination.current_page - 1) * pagination.per_page + 1) }} - 
+      {{ (pagination.current_page * pagination.per_page) if (pagination.current_page * pagination.per_page) < pagination.total_employees else pagination.total_employees }} 
+      of {{ pagination.total_employees }} employees
+    </span>
+  </div>
+  
+  <nav aria-label="Employee pagination">
+    <ul class="pagination">
+      <!-- Previous Button -->
+      <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+        {% if pagination.has_prev %}
+          <a class="page-link" href="?page={{ pagination.prev_page }}" aria-label="Previous">
+            <i class="fas fa-chevron-left"></i> Previous
+          </a>
+        {% else %}
+          <span class="page-link disabled-link">
+            <i class="fas fa-chevron-left"></i> Previous
+          </span>
+        {% endif %}
+      </li>
+      
+      <!-- First page if not in range -->
+      {% if pagination.start_page > 1 %}
+        <li class="page-item">
+          <a class="page-link" href="?page=1">1</a>
+        </li>
+        {% if pagination.start_page > 2 %}
+          <li class="page-item disabled">
+            <span class="page-link">...</span>
+          </li>
+        {% endif %}
+      {% endif %}
+      
+      <!-- Page numbers -->
+      {% for page_num in pagination.page_range %}
+        <li class="page-item {% if page_num == pagination.current_page %}active{% endif %}">
+          {% if page_num == pagination.current_page %}
+            <span class="page-link current-page">{{ page_num }}</span>
+          {% else %}
+            <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+          {% endif %}
+        </li>
+      {% endfor %}
+      
+      <!-- Last page if not in range -->
+      {% if pagination.end_page < pagination.total_pages %}
+        {% if pagination.end_page < pagination.total_pages - 1 %}
+          <li class="page-item disabled">
+            <span class="page-link">...</span>
+          </li>
+        {% endif %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ pagination.total_pages }}">{{ pagination.total_pages }}</a>
+        </li>
+      {% endif %}
+      
+      <!-- Next Button -->
+      <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+        {% if pagination.has_next %}
+          <a class="page-link" href="?page={{ pagination.next_page }}" aria-label="Next">
+            Next <i class="fas fa-chevron-right"></i>
+          </a>
+        {% else %}
+          <span class="page-link disabled-link">
+            Next <i class="fas fa-chevron-right"></i>
+          </span>
+        {% endif %}
+      </li>
+    </ul>
+  </nav>
+  
+  <!-- Items per page selector -->
+  <div class="per-page-selector">
+    <label for="perPage">Items per page:</label>
+    <select id="perPage" onchange="changePerPage(this.value)">
+      <option value="5" {% if pagination.per_page == 5 %}selected{% endif %}>5</option>
+      <option value="10" {% if pagination.per_page == 10 %}selected{% endif %}>10</option>
+      <option value="25" {% if pagination.per_page == 25 %}selected{% endif %}>25</option>
+      <option value="50" {% if pagination.per_page == 50 %}selected{% endif %}>50</option>
+    </select>
+  </div>
+</div>
+{% endif %}
+
+<script>
+function changePerPage(perPage) {
+    const url = new URL(window.location);
+    url.searchParams.set('per_page', perPage);
+    url.searchParams.set('page', '1'); // Reset to first page
+    window.location.href = url.toString();
+}
+</script>
+
+<style>
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.header-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.employee-count {
+    background: #f8f9fa;
+    padding: 8px 16px;
+    border-radius: 6px;
+    color: #495057;
+    font-weight: 500;
+}
+
+.pagination-container {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.pagination-info {
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.pagination {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 5px;
+}
+
+.page-item {
+    display: flex;
+}
+
+.page-link {
+    padding: 10px 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    color: #007bff;
+    text-decoration: none;
+    background-color: white;
+    transition: all 0.3s ease;
+}
+
+.page-link:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+    color: #0056b3;
+}
+
+.page-item.active .page-link,
+.current-page {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+.page-item.disabled .page-link,
+.disabled-link {
+    color: #6c757d;
+    pointer-events: none;
+    cursor: default;
+    background-color: #fff;
+    border-color: #dee2e6;
+}
+
+.per-page-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #495057;
+}
+
+.per-page-selector select {
+    padding: 5px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    background-color: white;
+}
+
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .pagination-container {
+        padding: 15px;
+    }
+    
+    .page-link {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+}
+</style>
 {% endblock %}

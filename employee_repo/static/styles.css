@@ -255,6 +255,11 @@ body {
     text-decoration: underline;
 }
 
+.not-found{
+    color: red;
+    text-align: center;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
     .header {
@@ -280,3 +285,5 @@ body {
         padding: 10px;
     }
 }
+
+

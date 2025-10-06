@@ -1,0 +1,12 @@
+{% extends "base.html" %} {% block title %}Employees - {{ super() }}{%endblock%}
+{% block content %}
+<div class="header">
+  <a href="/" class="btn btn-secondary">Back to List</a>
+</div>
+<div class="form-container">
+  <div class="not-found" style="color: red; text-align: center">
+    <h1>Oops!</h1>
+    <h1>Employee Not Found</h1>
+  </div>
+</div>
+{% endblock %}
